@@ -1,0 +1,286 @@
+
+Project_UNO.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .data         00000000  00800100  00800100  000001e8  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  1 .text         00000174  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .bss          00000002  00800100  00800100  000001e8  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  000001e8  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000218  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000048  00000000  00000000  00000258  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   0000088e  00000000  00000000  000002a0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 000006eb  00000000  00000000  00000b2e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   0000033a  00000000  00000000  00001219  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000088  00000000  00000000  00001554  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    000003f1  00000000  00000000  000015dc  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00000187  00000000  00000000  000019cd  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_ranges 00000038  00000000  00000000  00001b54  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 34 00 	jmp	0x68	; 0x68 <__ctors_end>
+   4:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+   8:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+   c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  10:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  14:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  18:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  1c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  20:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  24:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  28:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  2c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  30:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  34:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  38:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  3c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  40:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  44:	0c 94 87 00 	jmp	0x10e	; 0x10e <__vector_17>
+  48:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  4c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  50:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  54:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  58:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  5c:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  60:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+  64:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
+
+00000068 <__ctors_end>:
+  68:	11 24       	eor	r1, r1
+  6a:	1f be       	out	0x3f, r1	; 63
+  6c:	cf ef       	ldi	r28, 0xFF	; 255
+  6e:	d8 e0       	ldi	r29, 0x08	; 8
+  70:	de bf       	out	0x3e, r29	; 62
+  72:	cd bf       	out	0x3d, r28	; 61
+
+00000074 <__do_clear_bss>:
+  74:	21 e0       	ldi	r18, 0x01	; 1
+  76:	a0 e0       	ldi	r26, 0x00	; 0
+  78:	b1 e0       	ldi	r27, 0x01	; 1
+  7a:	01 c0       	rjmp	.+2      	; 0x7e <.do_clear_bss_start>
+
+0000007c <.do_clear_bss_loop>:
+  7c:	1d 92       	st	X+, r1
+
+0000007e <.do_clear_bss_start>:
+  7e:	a2 30       	cpi	r26, 0x02	; 2
+  80:	b2 07       	cpc	r27, r18
+  82:	e1 f7       	brne	.-8      	; 0x7c <.do_clear_bss_loop>
+  84:	0e 94 a0 00 	call	0x140	; 0x140 <main>
+  88:	0c 94 b8 00 	jmp	0x170	; 0x170 <_exit>
+
+0000008c <__bad_interrupt>:
+  8c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+00000090 <init_leds>:
+ volatile char  spi_cmd = 0;
+ volatile bool  spi_ready = false;
+ 
+ // Initialize PB0 and PB1 as outputs for the LEDs
+ static void init_leds(void) {
+     DDRB |= (1 << MOV_LED_PIN) | (1 << DOOR_LED_PIN);
+  90:	84 b1       	in	r24, 0x04	; 4
+  92:	83 60       	ori	r24, 0x03	; 3
+  94:	84 b9       	out	0x04, r24	; 4
+  96:	08 95       	ret
+
+00000098 <SPI_slave_init>:
+ }
+ 
+ // Initialize SPI in slave mode, enable interrupt, set MISO (PB4) as output
+ static void SPI_slave_init(void) {
+     DDRB |= (1 << PB4);            // MISO output
+  98:	84 b1       	in	r24, 0x04	; 4
+  9a:	80 61       	ori	r24, 0x10	; 16
+  9c:	84 b9       	out	0x04, r24	; 4
+     SPCR |= (1 << SPE)  // SPI Enable
+  9e:	8c b5       	in	r24, 0x2c	; 44
+  a0:	80 6c       	ori	r24, 0xC0	; 192
+  a2:	8c bd       	out	0x2c, r24	; 44
+           | (1 << SPIE); // SPI Interrupt Enable
+     SPDR = 0xFF;                   // prime SPDR
+  a4:	8f ef       	ldi	r24, 0xFF	; 255
+  a6:	8e bd       	out	0x2e, r24	; 46
+  a8:	08 95       	ret
+
+000000aa <blink_movement_led>:
+     }
+ }
+ 
+ // Blink movement LED (D8) once: on 1 s, off 1 s
+ static void blink_movement_led(void) {
+     PORTB |=  (1 << MOV_LED_PIN);
+  aa:	85 b1       	in	r24, 0x05	; 5
+  ac:	81 60       	ori	r24, 0x01	; 1
+  ae:	85 b9       	out	0x05, r24	; 5
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+  b0:	2f ef       	ldi	r18, 0xFF	; 255
+  b2:	83 ed       	ldi	r24, 0xD3	; 211
+  b4:	90 e3       	ldi	r25, 0x30	; 48
+  b6:	21 50       	subi	r18, 0x01	; 1
+  b8:	80 40       	sbci	r24, 0x00	; 0
+  ba:	90 40       	sbci	r25, 0x00	; 0
+  bc:	e1 f7       	brne	.-8      	; 0xb6 <blink_movement_led+0xc>
+  be:	00 c0       	rjmp	.+0      	; 0xc0 <blink_movement_led+0x16>
+  c0:	00 00       	nop
+     _delay_ms(1000);
+     PORTB &= ~(1 << MOV_LED_PIN);
+  c2:	85 b1       	in	r24, 0x05	; 5
+  c4:	8e 7f       	andi	r24, 0xFE	; 254
+  c6:	85 b9       	out	0x05, r24	; 5
+  c8:	2f ef       	ldi	r18, 0xFF	; 255
+  ca:	83 ed       	ldi	r24, 0xD3	; 211
+  cc:	90 e3       	ldi	r25, 0x30	; 48
+  ce:	21 50       	subi	r18, 0x01	; 1
+  d0:	80 40       	sbci	r24, 0x00	; 0
+  d2:	90 40       	sbci	r25, 0x00	; 0
+  d4:	e1 f7       	brne	.-8      	; 0xce <blink_movement_led+0x24>
+  d6:	00 c0       	rjmp	.+0      	; 0xd8 <blink_movement_led+0x2e>
+  d8:	00 00       	nop
+  da:	08 95       	ret
+
+000000dc <blink_door_led>:
+     _delay_ms(1000);
+ }
+ 
+ // Blink door LED (D9) once: on 1 s, off 1 s
+ static void blink_door_led(void) {
+     PORTB |=  (1 << DOOR_LED_PIN);
+  dc:	85 b1       	in	r24, 0x05	; 5
+  de:	82 60       	ori	r24, 0x02	; 2
+  e0:	85 b9       	out	0x05, r24	; 5
+  e2:	2f ef       	ldi	r18, 0xFF	; 255
+  e4:	83 ed       	ldi	r24, 0xD3	; 211
+  e6:	90 e3       	ldi	r25, 0x30	; 48
+  e8:	21 50       	subi	r18, 0x01	; 1
+  ea:	80 40       	sbci	r24, 0x00	; 0
+  ec:	90 40       	sbci	r25, 0x00	; 0
+  ee:	e1 f7       	brne	.-8      	; 0xe8 <blink_door_led+0xc>
+  f0:	00 c0       	rjmp	.+0      	; 0xf2 <blink_door_led+0x16>
+  f2:	00 00       	nop
+     _delay_ms(1000);
+     PORTB &= ~(1 << DOOR_LED_PIN);
+  f4:	85 b1       	in	r24, 0x05	; 5
+  f6:	8d 7f       	andi	r24, 0xFD	; 253
+  f8:	85 b9       	out	0x05, r24	; 5
+  fa:	2f ef       	ldi	r18, 0xFF	; 255
+  fc:	83 ed       	ldi	r24, 0xD3	; 211
+  fe:	90 e3       	ldi	r25, 0x30	; 48
+ 100:	21 50       	subi	r18, 0x01	; 1
+ 102:	80 40       	sbci	r24, 0x00	; 0
+ 104:	90 40       	sbci	r25, 0x00	; 0
+ 106:	e1 f7       	brne	.-8      	; 0x100 <blink_door_led+0x24>
+ 108:	00 c0       	rjmp	.+0      	; 0x10a <blink_door_led+0x2e>
+ 10a:	00 00       	nop
+ 10c:	08 95       	ret
+
+0000010e <__vector_17>:
+           | (1 << SPIE); // SPI Interrupt Enable
+     SPDR = 0xFF;                   // prime SPDR
+ }
+ 
+ // ISR: called on each received SPI byte
+ ISR(SPI_STC_vect) {
+ 10e:	1f 92       	push	r1
+ 110:	0f 92       	push	r0
+ 112:	0f b6       	in	r0, 0x3f	; 63
+ 114:	0f 92       	push	r0
+ 116:	11 24       	eor	r1, r1
+ 118:	8f 93       	push	r24
+ 11a:	9f 93       	push	r25
+     uint8_t c = SPDR;   // read received byte
+ 11c:	8e b5       	in	r24, 0x2e	; 46
+     SPDR = 0xFF;        // prepare dummy for next transfer
+ 11e:	9f ef       	ldi	r25, 0xFF	; 255
+ 120:	9e bd       	out	0x2e, r25	; 46
+ 
+     if (c == '\r') {
+ 122:	8d 30       	cpi	r24, 0x0D	; 13
+ 124:	21 f4       	brne	.+8      	; 0x12e <__vector_17+0x20>
+         // end‑of‑command marker: ready to act
+         spi_ready = true;
+ 126:	81 e0       	ldi	r24, 0x01	; 1
+ 128:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 12c:	02 c0       	rjmp	.+4      	; 0x132 <__vector_17+0x24>
+     } else {
+         // store latest command byte
+         spi_cmd = (char)c;
+ 12e:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <spi_cmd>
+     }
+ }
+ 132:	9f 91       	pop	r25
+ 134:	8f 91       	pop	r24
+ 136:	0f 90       	pop	r0
+ 138:	0f be       	out	0x3f, r0	; 63
+ 13a:	0f 90       	pop	r0
+ 13c:	1f 90       	pop	r1
+ 13e:	18 95       	reti
+
+00000140 <main>:
+     PORTB &= ~(1 << DOOR_LED_PIN);
+     _delay_ms(1000);
+ }
+ 
+ int main(void) {
+     init_leds();
+ 140:	0e 94 48 00 	call	0x90	; 0x90 <init_leds>
+     SPI_slave_init();
+ 144:	0e 94 4c 00 	call	0x98	; 0x98 <SPI_slave_init>
+     sei();  // enable global interrupts
+ 148:	78 94       	sei
+ 
+     while (1) {
+         if (spi_ready) {
+ 14a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 14e:	88 23       	and	r24, r24
+ 150:	e1 f3       	breq	.-8      	; 0x14a <main+0xa>
+             // Execute the command stored in spi_cmd
+             switch (spi_cmd) {
+ 152:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <spi_cmd>
+ 156:	88 33       	cpi	r24, 0x38	; 56
+ 158:	19 f0       	breq	.+6      	; 0x160 <main+0x20>
+ 15a:	89 33       	cpi	r24, 0x39	; 57
+ 15c:	21 f0       	breq	.+8      	; 0x166 <main+0x26>
+ 15e:	05 c0       	rjmp	.+10     	; 0x16a <main+0x2a>
+                 case '8':
+                     blink_movement_led();
+ 160:	0e 94 55 00 	call	0xaa	; 0xaa <blink_movement_led>
+                     break;
+ 164:	02 c0       	rjmp	.+4      	; 0x16a <main+0x2a>
+                 case '9':
+                     blink_door_led();
+ 166:	0e 94 6e 00 	call	0xdc	; 0xdc <blink_door_led>
+                 default:
+                     // unknown command: ignore
+                     break;
+             }
+             // reset for next command
+             spi_ready = false;
+ 16a:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 16e:	ed cf       	rjmp	.-38     	; 0x14a <main+0xa>
+
+00000170 <_exit>:
+ 170:	f8 94       	cli
+
+00000172 <__stop_program>:
+ 172:	ff cf       	rjmp	.-2      	; 0x172 <__stop_program>
