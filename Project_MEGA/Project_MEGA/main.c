@@ -1,5 +1,5 @@
 /*
- * main.c  � Arduino�Mega (ATmega2560) as SPI master,
+ * main.c  Arduino Mega (ATmega2560) as SPI master,
  * keypad + LCD on Mega, movement/door LEDs on UNO via SPI.
  */
 
@@ -102,12 +102,11 @@ int main(void) {
 
             // 3) arrived blink door LED on UNO
             blinkLED9_to_slave();
-            _delay_ms(1000);
 
             // show door open on LCD
             lcd_clrscr();
             lcd_puts("Door open");
-            _delay_ms(2000);
+            _delay_ms(1000);
 
             // back to idle
             lcd_clrscr();
