@@ -1,5 +1,5 @@
 /*
- * main.c  — Arduino Mega (ATmega2560) as SPI master,
+ * main.c  ï¿½ Arduinoï¿½Mega (ATmega2560) as SPI master,
  * keypad + LCD on Mega, movement/door LEDs on UNO via SPI.
  */
 
@@ -16,7 +16,7 @@
 #include "keypad.h"
 #include "lcd.h"
 
-// — UART for printf/scanf —
+//  UART for printf/scanf 
 static void USART_init(uint16_t ubrr) {
     UBRR0H = ubrr >> 8;
     UBRR0L = ubrr & 0xFF;
@@ -34,10 +34,10 @@ static char USART_Receive(FILE *stream) {
 FILE uart_output = FDEV_SETUP_STREAM(USART_Transmit, NULL, _FDEV_SETUP_WRITE);
 FILE uart_input  = FDEV_SETUP_STREAM(NULL, USART_Receive,  _FDEV_SETUP_READ);
 
-// — SPI master on Mega2560 —
-#define SS_PIN    PB0  // digital 53
-#define MOSI_PIN  PB2  // digital 51
-#define SCK_PIN   PB1  // digital 52
+// SPI master on Mega2560 
+#define SS_PIN    PB0  // digital53
+#define MOSI_PIN  PB2  // digital51
+#define SCK_PIN   PB1  // digital52
 
 static void SPI_master_init(void) {
     DDRB |= (1<<SS_PIN)|(1<<MOSI_PIN)|(1<<SCK_PIN);
@@ -83,7 +83,7 @@ int main(void) {
     SPDR = 0xFF;   // prime SPDR
 
     while (1) {
-        // 1) read floor from keypad (supports 0–9 here; extend for multi?digit)
+        // 1) read floor from keypad
         uint8_t key = KEYPAD_GetKey();
         _delay_ms(200);
         if (key != 0xFF) {
@@ -93,15 +93,16 @@ int main(void) {
             lcd_puts("Floor: ");
             lcd_puts(buf);
 
+            _delay_ms(1000);
+
             // 2) start movement ? blink movement LED on UNO
             blinkLED8_to_slave();
+            // simulate a 2s ride.
+            _delay_ms(2000);
 
-            // (You'd normally step floor by floor, updating LCD,
-            //  but here we just simulate a 2?s ride.)
-            _delay_ms(3000);
-
-            // 3) arrived ? blink door LED on UNO
+            // 3) arrived blink door LED on UNO
             blinkLED9_to_slave();
+            _delay_ms(1000);
 
             // show door open on LCD
             lcd_clrscr();
