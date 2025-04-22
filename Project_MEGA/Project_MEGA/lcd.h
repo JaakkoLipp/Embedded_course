@@ -161,10 +161,10 @@
 #define LCD_RS_PIN       6            /**< pin  for RS line         */
 #endif
 #ifndef LCD_RW_PORT
-#define LCD_RW_PORT      PORTB     /**< port for RW line         */
+#define LCD_RW_PORT      PORTA     /**< port for RW line         */
 #endif
 #ifndef LCD_RW_PIN
-#define LCD_RW_PIN       4            /**< pin  for RW line         */
+#define LCD_RW_PIN       0            /**< pin  for RW line         */
 #endif
 #ifndef LCD_E_PORT
 #define LCD_E_PORT       PORTB     /**< port for Enable line     */
