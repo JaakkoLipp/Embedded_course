@@ -1,117 +1,130 @@
-/*
- * main.c  Arduino Mega (ATmega2560) as SPI master,
- * keypad + LCD on Mega, movement/door LEDs on UNO via SPI.
- */
+/*************************************************************
+ * 2.  main_mega.c  – master (ATmega2560)
+ *************************************************************/
 
 #define F_CPU 16000000UL
-#define BAUD  9600
-#define FOSC  16000000UL
-#define MYUBRR (FOSC/16/BAUD - 1)
-
 #include <avr/io.h>
 #include <util/delay.h>
-#include <util/setbaud.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include "keypad.h"
+#include "delay.h"
 #include "lcd.h"
+#include "keypad.h"
+#include "protocol.h"
 
-//  UART for printf/scanf 
-static void USART_init(uint16_t ubrr) {
-    UBRR0H = ubrr >> 8;
-    UBRR0L = ubrr & 0xFF;
-    UCSR0B |= (1<<RXEN0)|(1<<TXEN0);
-    UCSR0C |= (1<<USBS0)|(3<<UCSZ00);  // 8 data, 2 stop
-}
-static void USART_Transmit(unsigned char data, FILE *stream) {
-    while (!(UCSR0A & (1<<UDRE0)));
-    UDR0 = data;
-}
-static char USART_Receive(FILE *stream) {
-    while (!(UCSR0A & (1<<RXC0)));
-    return UDR0;
-}
-FILE uart_output = FDEV_SETUP_STREAM(USART_Transmit, NULL, _FDEV_SETUP_WRITE);
-FILE uart_input  = FDEV_SETUP_STREAM(NULL, USART_Receive,  _FDEV_SETUP_READ);
-
-// SPI master on Mega2560 
-#define SS_PIN    PB0  // digital53
-#define MOSI_PIN  PB2  // digital51
-#define SCK_PIN   PB1  // digital52
-
-static void SPI_master_init(void) {
-    DDRB |= (1<<SS_PIN)|(1<<MOSI_PIN)|(1<<SCK_PIN);
-    SPCR |= (1<<SPE)|(1<<MSTR)|(1<<SPR0);  // enable, master, fosc/16
+/* ---------------- SPI master helpers ---------------- */
+static void spi_master_init(void)
+{
+    /* SCK = PB1, MOSI = PB2, SS = PB0  ? outputs; MISO PB3 input */
+    DDRB |= (1<<PB1) | (1<<PB2) | (1<<PB0);
+    DDRB &= ~(1<<PB3);
+    /* Keep SS high (idle) */
+    PORTB |= (1<<PB0);
+    /* Enable SPI, Master, f_osc/16 (1 MHz at 16 MHz clock) */
+    SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
 }
 
-// Lower SS, send cmd + '\r', raise SS
-static void send_command_to_slave(char cmd) {
-    PORTB &= ~(1<<SS_PIN);
-    SPDR = cmd;
+static uint8_t spi_tx(uint8_t data)
+{
+    SPDR = data;
     while (!(SPSR & (1<<SPIF)));
-    _delay_us(5);
-
-    SPDR = '\r';
-    while (!(SPSR & (1<<SPIF)));
-    _delay_us(5);
-
-    PORTB |= (1<<SS_PIN);
+    return SPDR;          /* discard slave reply for now */
 }
 
-static inline void blinkLED8_to_slave(void) { send_command_to_slave('8'); }
-static inline void blinkLED9_to_slave(void) { send_command_to_slave('9'); }
+static void spi_cmd(uint8_t cmd)
+{
+    PORTB &= ~(1<<PB0);   /* SS low  */
+    spi_tx(cmd);
+    PORTB |=  (1<<PB0);   /* SS high */
+}
 
-// Initialize LCD & keypad
-static void setup_display_and_keypad(void) {
+/* ---------------- small helpers ---------------- */
+static uint8_t is_digit(char c){ return (c>='0' && c<='9'); }
+static void led_movement_on (void){ spi_cmd(CMD_MOVEMENT_LED_ON); }
+static void led_movement_off(void){ spi_cmd(CMD_MOVEMENT_LED_OFF);} 
+static void led_door_on      (void){ spi_cmd(CMD_DOOR_LED_ON);    }
+static void led_door_off     (void){ spi_cmd(CMD_DOOR_LED_OFF);   }
+
+/* ---------------- main state machine ---------------- */
+#define FLOOR_TIME_SEC 3      /* 1 s per floor in this simple simulation */
+
+enum state_t { ST_IDLE, ST_MOVING, ST_DOOR };
+
+int main(void)
+{
+    uint8_t  current_floor = 0;
+    uint8_t  target_floor  = 0;
+    enum state_t state = ST_IDLE;
+
+    KEYPAD_Init();
+    spi_master_init();
+
     lcd_init(LCD_DISP_ON);
     lcd_clrscr();
-    lcd_puts("Choose floor");
-    _delay_ms(1000);
-    KEYPAD_Init();
-}
 
-int main(void) {
-    setup_display_and_keypad();
-
-    // UART for debugging (optional)
-    USART_init(MYUBRR);
-    stdout = &uart_output;
-    stdin  = &uart_input;
-
-    // SPI
-    SPI_master_init();
-    SPDR = 0xFF;   // prime SPDR
-
-    while (1) {
-        // 1) read floor from keypad
-        uint8_t key = KEYPAD_GetKey();
-        _delay_ms(200);
-        if (key != 0xFF) {
-            // show the floor
-            char buf[3] = { (char)key, '\0' };
+    while (1)
+    {
+        switch(state)
+        {
+        /* ------------------------------------------------ IDLE */
+        case ST_IDLE:
             lcd_clrscr();
-            lcd_puts("Floor: ");
-            lcd_puts(buf);
+            lcd_puts("Choose floor:");
 
-            _delay_ms(1000);
+            /* Wait first digit */
+            char d1;
+            do{ d1 = KEYPAD_GetKey(); } while(!is_digit(d1));
+            lcd_gotoxy(0,1); lcd_putc(d1);
 
-            // 2) start movement ? blink movement LED on UNO
-            blinkLED8_to_slave();
-            // simulate a 2s ride.
-            _delay_ms(2000);
+            /* Wait second digit */
+            char d2;
+            do{ d2 = KEYPAD_GetKey(); } while(!is_digit(d2));
+            lcd_putc(d2);
 
-            // 3) arrived blink door LED on UNO
-            blinkLED9_to_slave();
+            target_floor = (d1 - '0')*10 + (d2 - '0');
 
-            // show door open on LCD
+            if(target_floor == current_floor)
+            {
+                /* Fault: blink movement LED 3× and stay in IDLE */
+                for(uint8_t i=0;i<3;i++){ led_movement_on(); DELAY_ms(250); led_movement_off(); DELAY_ms(250);}                
+            }
+            else
+            {
+                state = ST_MOVING;
+            }
+            break;
+
+        /* ------------------------------------------------ MOVING */
+        case ST_MOVING:
+            led_movement_on();
+            int8_t dir = (target_floor > current_floor) ? 1 : -1;
+            while(current_floor != target_floor)
+            {
+                current_floor += dir;
+                /* update LCD second line with current floor */
+                lcd_gotoxy(0,1);
+                char buf[17];
+                itoa(current_floor, buf, 10);
+                lcd_puts("Floor ");
+                lcd_puts(buf);
+                /* simple time model */
+                DELAY_sec(FLOOR_TIME_SEC);
+            }
+            led_movement_off();
+            state = ST_DOOR;
+            break;
+
+        /* ------------------------------------------------ DOOR OPEN/CLOSE */
+        case ST_DOOR:
+            led_door_on();
             lcd_clrscr();
-            lcd_puts("Door open");
-            _delay_ms(1000);
-
-            // back to idle
+            lcd_puts("Door opening...");
+            DELAY_sec(5);
+            led_door_off();
             lcd_clrscr();
-            lcd_puts("Choose floor");
+            lcd_puts("Door closed");
+            DELAY_sec(1);
+            state = ST_IDLE;
+            break;
         }
     }
-    return 0;
 }
