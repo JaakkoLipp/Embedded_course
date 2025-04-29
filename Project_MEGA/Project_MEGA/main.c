@@ -1,5 +1,5 @@
 /*************************************************************
- * 2.  main_mega.c  � master (ATmega2560)
+ * 2.  main_mega.c  – master (ATmega2560)
  *************************************************************/
 
 #define F_CPU 16000000UL
@@ -14,12 +14,12 @@
 /* ---------------- SPI master helpers ---------------- */
 static void spi_master_init(void)
 {
-    /* SCK�=�PB1, MOSI�=�PB2, SS�=�PB0  ? outputs; MISO�PB3 input */
+    /* SCK = PB1, MOSI = PB2, SS = PB0  → outputs; MISO = PB3 input */
     DDRB |= (1<<PB1) | (1<<PB2) | (1<<PB0);
     DDRB &= ~(1<<PB3);
     /* Keep SS high (idle) */
     PORTB |= (1<<PB0);
-    /* Enable SPI, Master, f_osc/16 (1�MHz at 16�MHz clock) */
+    /* Enable SPI, Master, f_osc/16 (1 MHz at 16 MHz clock) */
     SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
 }
 
@@ -44,8 +44,44 @@ static void led_movement_off(void){ spi_cmd(CMD_MOVEMENT_LED_OFF);}
 static void led_door_on      (void){ spi_cmd(CMD_DOOR_LED_ON);    }
 static void led_door_off     (void){ spi_cmd(CMD_DOOR_LED_OFF);   }
 
+/* ---------------- emergency helpers ---------------- */
+#define EMERGENCY_BUTTON_PIN PD2
+
+static void emergency_button_init(void)
+{
+    DDRD &= ~(1 << EMERGENCY_BUTTON_PIN);   // Input
+    PORTD |=  (1 << EMERGENCY_BUTTON_PIN);  // Pull-up enabled
+}
+
+static uint8_t emergency_button_pressed(void)
+{
+    return !(PIND & (1 << EMERGENCY_BUTTON_PIN)); // Active low
+}
+
+static void handle_emergency(void)
+{
+    lcd_clrscr();
+    lcd_puts("EMERGENCY");
+
+    for (uint8_t i = 0; i < 3; i++) {
+        led_movement_on();
+        DELAY_ms(300);
+        led_movement_off();
+        DELAY_ms(300);
+    }
+
+    led_door_on();
+    spi_cmd(CMD_EMERGENCY);  // Command to uno to play melody
+    DELAY_ms(1500);
+    led_door_off();
+
+    // Wait for button release to avoid repeated triggering
+    while (emergency_button_pressed());
+    _delay_ms(200);
+}
+
 /* ---------------- main state machine ---------------- */
-#define FLOOR_TIME_SEC 250      /* 1�s per floor in this simple simulation */
+#define FLOOR_TIME_SEC 3      /* 1 s per floor in this simple simulation */
 
 enum state_t { ST_IDLE, ST_MOVING, ST_DOOR };
 
@@ -57,12 +93,20 @@ int main(void)
 
     KEYPAD_Init();
     spi_master_init();
+    emergency_button_init();
 
     lcd_init(LCD_DISP_ON);
     lcd_clrscr();
 
     while (1)
     {
+        // --- Check emergency button each loop ---
+        if (emergency_button_pressed()) {
+            handle_emergency();
+            state = ST_IDLE; // return to idle after emergency
+            continue;
+        }
+
         switch(state)
         {
         /* ------------------------------------------------ IDLE */
@@ -84,8 +128,8 @@ int main(void)
 
             if(target_floor == current_floor)
             {
-                /* Fault: blink movement LED 3� and stay in IDLE */
-                for(uint8_t i=0;i<3;i++){ led_movement_on(); _delay_ms(500); led_movement_off(); _delay_ms(500);}
+                /* Fault: blink movement LED 3× and stay in IDLE */
+                for(uint8_t i=0;i<3;i++){ led_movement_on(); DELAY_ms(500); led_movement_off(); DELAY_ms(500);}                
             }
             else
             {
@@ -107,7 +151,7 @@ int main(void)
                 lcd_puts("Floor ");
                 lcd_puts(buf);
                 /* simple time model */
-                _delay_ms(FLOOR_TIME_SEC);
+                DELAY_sec(FLOOR_TIME_SEC);
             }
             led_movement_off();
             state = ST_DOOR;
@@ -118,11 +162,11 @@ int main(void)
             led_door_on();
             lcd_clrscr();
             lcd_puts("Door opening...");
-            _delay_ms(5000);
+            DELAY_sec(5);
             led_door_off();
             lcd_clrscr();
             lcd_puts("Door closed");
-            _delay_ms(200);
+            DELAY_sec(1);
             state = ST_IDLE;
             break;
         }
