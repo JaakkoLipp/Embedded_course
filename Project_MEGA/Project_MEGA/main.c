@@ -51,7 +51,7 @@ static void led_door_on      (void){ spi_cmd(CMD_DOOR_LED_ON);    }
 static void led_door_off     (void){ spi_cmd(CMD_DOOR_LED_OFF);   }
 
 /* ---------------- main state machine ---------------- */
-#define FLOOR_TIME_SEC 250      /* 1�s per floor in this simple simulation */
+#define FLOOR_TIME_SEC 250
 
 enum state_t { ST_IDLE, ST_MOVING, ST_DOOR, ST_EMERGENCY };
     
@@ -121,11 +121,10 @@ int main(void)
 
                     /* update LCD second line */
                     lcd_gotoxy(0,1);
-                    char buf[17];
-                    itoa(current_floor, buf, 10);
-                    lcd_puts("Floor ");
-                    lcd_puts(buf);
-
+                    char line[17];
+                    sprintf(line, "Floor %02u", current_floor); /* always 00‥99 */
+                    lcd_puts(line);
+                    
                     _delay_ms(FLOOR_TIME_SEC);   /* still interrupt-friendly */
                 }
             }
@@ -154,7 +153,7 @@ int main(void)
             
     /* ------------------------------------------------ EMERGENCY  (minimum level) */
     case ST_EMERGENCY:
-        emg_flag = 0;                 /* reset flag so a second press is possible */
+        emg_flag = 0;
         lcd_clrscr();
         lcd_puts("!!! EMERGENCY !!!");
 
