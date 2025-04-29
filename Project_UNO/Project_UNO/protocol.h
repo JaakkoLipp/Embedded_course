@@ -9,5 +9,6 @@
 #define CMD_MOVEMENT_LED_OFF  0x11
 #define CMD_DOOR_LED_ON       0x12
 #define CMD_DOOR_LED_OFF      0x13
+#define CMD_EMERGENCY         0x14
 
 #endif /* PROTOCOL_H */
