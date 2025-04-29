@@ -3,31 +3,31 @@ Project_UNO.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  000002d2  2**0
+  0 .data         00000000  00800100  00800100  000002f6  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000025e  00000000  00000000  00000074  2**1
+  1 .text         00000282  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000001  00800100  00800100  000002d2  2**0
+  2 .bss          00000002  00800100  00800100  000002f6  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000002d2  2**0
+  3 .comment      00000030  00000000  00000000  000002f6  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000304  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000328  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000060  00000000  00000000  00000344  2**0
+  5 .debug_aranges 00000060  00000000  00000000  00000368  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000a2a  00000000  00000000  000003a4  2**0
+  6 .debug_info   00000a7a  00000000  00000000  000003c8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 0000074e  00000000  00000000  00000dce  2**0
+  7 .debug_abbrev 0000075d  00000000  00000000  00000e42  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000003d3  00000000  00000000  0000151c  2**0
+  8 .debug_line   000003ec  00000000  00000000  0000159f  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  000000d4  00000000  00000000  000018f0  2**2
+  9 .debug_frame  000000d4  00000000  00000000  0000198c  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000412  00000000  00000000  000019c4  2**0
+ 10 .debug_str    00000429  00000000  00000000  00001a60  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000232  00000000  00000000  00001dd6  2**0
+ 11 .debug_loc    0000023d  00000000  00000000  00001e89  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000050  00000000  00000000  00002008  2**0
+ 12 .debug_ranges 00000050  00000000  00000000  000020c6  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -44,7 +44,7 @@ Disassembly of section .text:
   20:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   24:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   28:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
-  2c:	0c 94 07 01 	jmp	0x20e	; 0x20e <__vector_11>
+  2c:	0c 94 0d 01 	jmp	0x21a	; 0x21a <__vector_11>
   30:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   34:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
   38:	0c 94 46 00 	jmp	0x8c	; 0x8c <__bad_interrupt>
@@ -78,11 +78,11 @@ Disassembly of section .text:
   7c:	1d 92       	st	X+, r1
 
 0000007e <.do_clear_bss_start>:
-  7e:	a1 30       	cpi	r26, 0x01	; 1
+  7e:	a2 30       	cpi	r26, 0x02	; 2
   80:	b2 07       	cpc	r27, r18
   82:	e1 f7       	brne	.-8      	; 0x7c <.do_clear_bss_loop>
-  84:	0e 94 19 01 	call	0x232	; 0x232 <main>
-  88:	0c 94 2d 01 	jmp	0x25a	; 0x25a <_exit>
+  84:	0e 94 1f 01 	call	0x23e	; 0x23e <main>
+  88:	0c 94 3f 01 	jmp	0x27e	; 0x27e <_exit>
 
 0000008c <__bad_interrupt>:
   8c:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -171,7 +171,7 @@ static void tone_stop(void)
 000000f0 <play_note>:
 }
 
-/* -------- data taken from your melody table -------- */
+/* -------- emergency note util -------- */
 static void play_note(uint16_t ocr, uint16_t ms)
 {
   f0:	cf 93       	push	r28
@@ -300,117 +300,143 @@ ISR(SPI_STC_vect)
 
     switch (cmd)
  1c2:	82 31       	cpi	r24, 0x12	; 18
- 1c4:	99 f0       	breq	.+38     	; 0x1ec <__vector_17+0x38>
+ 1c4:	a9 f0       	breq	.+42     	; 0x1f0 <__vector_17+0x3c>
  1c6:	28 f4       	brcc	.+10     	; 0x1d2 <__vector_17+0x1e>
  1c8:	80 31       	cpi	r24, 0x10	; 16
- 1ca:	41 f0       	breq	.+16     	; 0x1dc <__vector_17+0x28>
+ 1ca:	51 f0       	breq	.+20     	; 0x1e0 <__vector_17+0x2c>
  1cc:	81 31       	cpi	r24, 0x11	; 17
- 1ce:	51 f0       	breq	.+20     	; 0x1e4 <__vector_17+0x30>
- 1d0:	18 c0       	rjmp	.+48     	; 0x202 <__vector_17+0x4e>
- 1d2:	83 31       	cpi	r24, 0x13	; 19
- 1d4:	79 f0       	breq	.+30     	; 0x1f4 <__vector_17+0x40>
- 1d6:	80 32       	cpi	r24, 0x20	; 32
- 1d8:	89 f0       	breq	.+34     	; 0x1fc <__vector_17+0x48>
- 1da:	13 c0       	rjmp	.+38     	; 0x202 <__vector_17+0x4e>
+ 1ce:	61 f0       	breq	.+24     	; 0x1e8 <__vector_17+0x34>
+ 1d0:	1e c0       	rjmp	.+60     	; 0x20e <__vector_17+0x5a>
+ 1d2:	80 32       	cpi	r24, 0x20	; 32
+ 1d4:	a9 f0       	breq	.+42     	; 0x200 <__vector_17+0x4c>
+ 1d6:	85 32       	cpi	r24, 0x25	; 37
+ 1d8:	b9 f0       	breq	.+46     	; 0x208 <__vector_17+0x54>
+ 1da:	83 31       	cpi	r24, 0x13	; 19
+ 1dc:	c1 f4       	brne	.+48     	; 0x20e <__vector_17+0x5a>
+ 1de:	0c c0       	rjmp	.+24     	; 0x1f8 <__vector_17+0x44>
     {
     case CMD_MOVEMENT_LED_ON:      PORTB |=  _BV(MOV_LED_PIN);  break;
- 1dc:	85 b1       	in	r24, 0x05	; 5
- 1de:	81 60       	ori	r24, 0x01	; 1
- 1e0:	85 b9       	out	0x05, r24	; 5
- 1e2:	0f c0       	rjmp	.+30     	; 0x202 <__vector_17+0x4e>
+ 1e0:	85 b1       	in	r24, 0x05	; 5
+ 1e2:	81 60       	ori	r24, 0x01	; 1
+ 1e4:	85 b9       	out	0x05, r24	; 5
+ 1e6:	13 c0       	rjmp	.+38     	; 0x20e <__vector_17+0x5a>
     case CMD_MOVEMENT_LED_OFF:     PORTB &= ~_BV(MOV_LED_PIN);  break;
- 1e4:	85 b1       	in	r24, 0x05	; 5
- 1e6:	8e 7f       	andi	r24, 0xFE	; 254
- 1e8:	85 b9       	out	0x05, r24	; 5
- 1ea:	0b c0       	rjmp	.+22     	; 0x202 <__vector_17+0x4e>
+ 1e8:	85 b1       	in	r24, 0x05	; 5
+ 1ea:	8e 7f       	andi	r24, 0xFE	; 254
+ 1ec:	85 b9       	out	0x05, r24	; 5
+ 1ee:	0f c0       	rjmp	.+30     	; 0x20e <__vector_17+0x5a>
     case CMD_DOOR_LED_ON:          PORTB |=  _BV(DOOR_LED_PIN); break;
- 1ec:	85 b1       	in	r24, 0x05	; 5
- 1ee:	82 60       	ori	r24, 0x02	; 2
- 1f0:	85 b9       	out	0x05, r24	; 5
- 1f2:	07 c0       	rjmp	.+14     	; 0x202 <__vector_17+0x4e>
+ 1f0:	85 b1       	in	r24, 0x05	; 5
+ 1f2:	82 60       	ori	r24, 0x02	; 2
+ 1f4:	85 b9       	out	0x05, r24	; 5
+ 1f6:	0b c0       	rjmp	.+22     	; 0x20e <__vector_17+0x5a>
     case CMD_DOOR_LED_OFF:         PORTB &= ~_BV(DOOR_LED_PIN); break;
- 1f4:	85 b1       	in	r24, 0x05	; 5
- 1f6:	8d 7f       	andi	r24, 0xFD	; 253
- 1f8:	85 b9       	out	0x05, r24	; 5
- 1fa:	03 c0       	rjmp	.+6      	; 0x202 <__vector_17+0x4e>
-    case CMD_BUZZER_PLAY_ONESHOT:  buzzer_request = 1;           break;
- 1fc:	81 e0       	ldi	r24, 0x01	; 1
- 1fe:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 1f8:	85 b1       	in	r24, 0x05	; 5
+ 1fa:	8d 7f       	andi	r24, 0xFD	; 253
+ 1fc:	85 b9       	out	0x05, r24	; 5
+ 1fe:	07 c0       	rjmp	.+14     	; 0x20e <__vector_17+0x5a>
+    case CMD_BUZZER_PLAY_ONESHOT:  buzzer_request = 1;          break;
+ 200:	81 e0       	ldi	r24, 0x01	; 1
+ 202:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <buzzer_request>
+ 206:	03 c0       	rjmp	.+6      	; 0x20e <__vector_17+0x5a>
+    case CMD_DING:                 ding_request = 1;            break;
+ 208:	81 e0       	ldi	r24, 0x01	; 1
+ 20a:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
+
     default: break;
     }
 }
- 202:	8f 91       	pop	r24
- 204:	0f 90       	pop	r0
- 206:	0f be       	out	0x3f, r0	; 63
- 208:	0f 90       	pop	r0
- 20a:	1f 90       	pop	r1
- 20c:	18 95       	reti
+ 20e:	8f 91       	pop	r24
+ 210:	0f 90       	pop	r0
+ 212:	0f be       	out	0x3f, r0	; 63
+ 214:	0f 90       	pop	r0
+ 216:	1f 90       	pop	r1
+ 218:	18 95       	reti
 
-0000020e <__vector_11>:
+0000021a <__vector_11>:
     TCCR1A = 0;                    /* normal port ops    */
     TCCR1B = _BV(WGM12);           /* CTC, clk stopped   */
 }
 
 ISR(TIMER1_COMPA_vect)
 {
- 20e:	1f 92       	push	r1
- 210:	0f 92       	push	r0
- 212:	0f b6       	in	r0, 0x3f	; 63
- 214:	0f 92       	push	r0
- 216:	11 24       	eor	r1, r1
- 218:	8f 93       	push	r24
- 21a:	9f 93       	push	r25
+ 21a:	1f 92       	push	r1
+ 21c:	0f 92       	push	r0
+ 21e:	0f b6       	in	r0, 0x3f	; 63
+ 220:	0f 92       	push	r0
+ 222:	11 24       	eor	r1, r1
+ 224:	8f 93       	push	r24
+ 226:	9f 93       	push	r25
     PORTD ^= _BV(BUZZER_PIN);      /* toggle every compare match */
- 21c:	9b b1       	in	r25, 0x0b	; 11
- 21e:	88 e0       	ldi	r24, 0x08	; 8
- 220:	89 27       	eor	r24, r25
- 222:	8b b9       	out	0x0b, r24	; 11
+ 228:	9b b1       	in	r25, 0x0b	; 11
+ 22a:	88 e0       	ldi	r24, 0x08	; 8
+ 22c:	89 27       	eor	r24, r25
+ 22e:	8b b9       	out	0x0b, r24	; 11
 }
- 224:	9f 91       	pop	r25
- 226:	8f 91       	pop	r24
- 228:	0f 90       	pop	r0
- 22a:	0f be       	out	0x3f, r0	; 63
- 22c:	0f 90       	pop	r0
- 22e:	1f 90       	pop	r1
- 230:	18 95       	reti
+ 230:	9f 91       	pop	r25
+ 232:	8f 91       	pop	r24
+ 234:	0f 90       	pop	r0
+ 236:	0f be       	out	0x3f, r0	; 63
+ 238:	0f 90       	pop	r0
+ 23a:	1f 90       	pop	r1
+ 23c:	18 95       	reti
 
-00000232 <main>:
+0000023e <main>:
    MAIN
    ===========================================================*/
 int main(void)
 {
     /* LEDs */
     DDRB  |= _BV(MOV_LED_PIN) | _BV(DOOR_LED_PIN);
- 232:	84 b1       	in	r24, 0x04	; 4
- 234:	83 60       	ori	r24, 0x03	; 3
- 236:	84 b9       	out	0x04, r24	; 4
+ 23e:	84 b1       	in	r24, 0x04	; 4
+ 240:	83 60       	ori	r24, 0x03	; 3
+ 242:	84 b9       	out	0x04, r24	; 4
     PORTB &= ~(_BV(MOV_LED_PIN) | _BV(DOOR_LED_PIN));
- 238:	85 b1       	in	r24, 0x05	; 5
- 23a:	8c 7f       	andi	r24, 0xFC	; 252
- 23c:	85 b9       	out	0x05, r24	; 5
+ 244:	85 b1       	in	r24, 0x05	; 5
+ 246:	8c 7f       	andi	r24, 0xFC	; 252
+ 248:	85 b9       	out	0x05, r24	; 5
 
     buzzer_init();
- 23e:	0e 94 4e 00 	call	0x9c	; 0x9c <buzzer_init>
+ 24a:	0e 94 4e 00 	call	0x9c	; 0x9c <buzzer_init>
     spi_slave_init();
- 242:	0e 94 48 00 	call	0x90	; 0x90 <spi_slave_init>
+ 24e:	0e 94 48 00 	call	0x90	; 0x90 <spi_slave_init>
     sei();
- 246:	78 94       	sei
+ 252:	78 94       	sei
 
     for (;;)
     {
         if (buzzer_request)
- 248:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
- 24c:	88 23       	and	r24, r24
- 24e:	e1 f3       	breq	.-8      	; 0x248 <main+0x16>
+ 254:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <buzzer_request>
+ 258:	88 23       	and	r24, r24
+ 25a:	21 f0       	breq	.+8      	; 0x264 <main+0x26>
         {
             buzzer_request = 0;
- 250:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 25c:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <buzzer_request>
             play_melody();         /* ~1.7 s blocking OK on slave */
- 254:	0e 94 97 00 	call	0x12e	; 0x12e <play_melody>
- 258:	f7 cf       	rjmp	.-18     	; 0x248 <main+0x16>
+ 260:	0e 94 97 00 	call	0x12e	; 0x12e <play_melody>
+        }
+        if (ding_request)
+ 264:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
+ 268:	88 23       	and	r24, r24
+ 26a:	a1 f3       	breq	.-24     	; 0x254 <main+0x16>
+        {
+            ding_request= 0;
+ 26c:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <__DATA_REGION_ORIGIN__>
 
-0000025a <_exit>:
- 25a:	f8 94       	cli
+/* floor arrival ding */
+static inline void play_ding(void)
+{
+    /* 500 Hz, 100 ms */
+    play_note(16000, 100);      /* OCR1A = 16000 ⇒ ~500 Hz */
+ 270:	64 e6       	ldi	r22, 0x64	; 100
+ 272:	70 e0       	ldi	r23, 0x00	; 0
+ 274:	80 e8       	ldi	r24, 0x80	; 128
+ 276:	9e e3       	ldi	r25, 0x3E	; 62
+ 278:	0e 94 78 00 	call	0xf0	; 0xf0 <play_note>
+ 27c:	eb cf       	rjmp	.-42     	; 0x254 <main+0x16>
 
-0000025c <__stop_program>:
- 25c:	ff cf       	rjmp	.-2      	; 0x25c <__stop_program>
+0000027e <_exit>:
+ 27e:	f8 94       	cli
+
+00000280 <__stop_program>:
+ 280:	ff cf       	rjmp	.-2      	; 0x280 <__stop_program>

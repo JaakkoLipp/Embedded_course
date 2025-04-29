@@ -6,16 +6,28 @@
 #define EMG_PIN   PE4
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include <util/delay.h>
 #include <stdlib.h>
-#include "delay.h"
+#include <stdio.h>
 #include "lcd.h"
 #include "keypad.h"
 #include "protocol.h"
 
+/* emergency flag triggered by button */
 volatile uint8_t emg_flag = 0;
-
 ISR(INT4_vect) { emg_flag = 1; }
+    
+/* =========== 10-ms system tick (Timer-1 CTC) =========== */
+volatile uint32_t tick10ms = 0;
+
+ISR(TIMER1_COMPA_vect) { tick10ms++; }
+
+/* Wait-helper that lets the CPU run other code/ISRs */
+static void wait_ms(uint16_t ms)
+{
+    uint32_t target = tick10ms + (ms / 10);
+    while (tick10ms < target)      /* idle-loop but IRQs keep running */
+    ;                          /* you could power-save here later */
+}
 
 /* ---------------- SPI master helpers ---------------- */
 static void spi_master_init(void)
@@ -73,6 +85,11 @@ int main(void)
     KEYPAD_Init();
     spi_master_init();
 
+    /* --- 10 ms tick --- */
+    TCCR1B = _BV(WGM12) | _BV(CS12) | _BV(CS10);          /* CTC, clk/1024 */
+    OCR1A  = (F_CPU / 1024 / 100) - 1;                    /* 10 ms period */
+    TIMSK1 = _BV(OCIE1A);
+
     lcd_init(LCD_DISP_ON);
     lcd_clrscr();
 
@@ -100,7 +117,7 @@ int main(void)
             if(target_floor == current_floor)
             {
                 /* Fault: blink movement LED 3� and stay in IDLE */
-                for(uint8_t i=0;i<3;i++){ led_movement_on(); _delay_ms(500); led_movement_off(); _delay_ms(500);}
+                for(uint8_t i=0;i<3;i++){ led_movement_on(); wait_ms(500); led_movement_off(); wait_ms(500);}
             }
             else
             {
@@ -125,9 +142,11 @@ int main(void)
                     sprintf(line, "Floor %02u", current_floor); /* always 00‥99 */
                     lcd_puts(line);
                     
-                    _delay_ms(FLOOR_TIME_SEC);   /* still interrupt-friendly */
+                    wait_ms(FLOOR_TIME_SEC);   /* still interrupt-friendly */
                 }
             }
+            if(emg_flag == 0){spi_cmd(CMD_DING);}   /* play floor arrival chime on UNO */
+            
             led_movement_off();
 
             /* decide next state */
@@ -143,38 +162,48 @@ int main(void)
             led_door_on();
             lcd_clrscr();
             lcd_puts("Door opening...");
-            _delay_ms(5000);
+            wait_ms(5000);
             led_door_off();
             lcd_clrscr();
             lcd_puts("Door closed");
-            _delay_ms(1500);
+            wait_ms(1500);
             state = ST_IDLE;
             break;
             
-    /* ------------------------------------------------ EMERGENCY  (minimum level) */
-    case ST_EMERGENCY:
-        emg_flag = 0;
-        lcd_clrscr();
-        lcd_puts("!!! EMERGENCY !!!");
+    /* ------------------------------------------------ EMERGENCY  (improved level) */
+        case ST_EMERGENCY:
+            emg_flag = 0;                     /* allow re-trigger later      */
+            lcd_clrscr();
+            lcd_puts("!!! EMERGENCY !!!");
+            
+            /* play melody once on UNO */
+            spi_cmd(CMD_BUZZER_PLAY_ONESHOT);
+            
+            /* movement LED blinks 3× */
+            for (uint8_t i = 0; i < 3; i++) {
+                led_movement_on();  wait_ms(300);
+                led_movement_off(); wait_ms(300);
+            }
 
-        /* 1. movement LED blinks 3× */
-        for (uint8_t i = 0; i < 3; i++) {
-            led_movement_on();  _delay_ms(300);
-            led_movement_off(); _delay_ms(300);
-        }
+            /* wait for user confirmation (#) to open the door */
+            lcd_clrscr();
+            lcd_puts("Press # to open");
+            char key;
+            do { key = KEYPAD_GetKey(); } while (key != '#');
 
-        /* 2. open door + buzzer melody (one loop) */
-        led_door_on();
-        spi_cmd(CMD_BUZZER_PLAY_ONESHOT);
-        lcd_clrscr(); lcd_puts("Door opening...");
-        _delay_ms(5000);              /* keep door open 5 s */
+            /* open door */
+            led_door_on();
+            spi_cmd(CMD_DING);
+            lcd_clrscr(); lcd_puts("Door opening...");
+            wait_ms(5000);                    /* keep door open 5 s */
 
-        /* 3. close door and go idle */
-        led_door_off();
-        lcd_clrscr(); lcd_puts("Door closed");
-        _delay_ms(1500);
-        state = ST_IDLE;
-        break;
+            /* close door and return to idle */
+            led_door_off();
+            lcd_clrscr(); lcd_puts("Door closed");
+            wait_ms(1500);
+            state = ST_IDLE;
+            break;
+
 
         }
     }
