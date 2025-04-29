@@ -17,6 +17,7 @@
 
 /* ---------------- globals ---------------- */
 volatile uint8_t buzzer_request = 0;
+volatile uint8_t ding_request   = 0;   /* used for floor arrival ding*/
 
 /* ===========================================================
    SPI  (slave, interrupt-driven)
@@ -37,7 +38,9 @@ ISR(SPI_STC_vect)
     case CMD_MOVEMENT_LED_OFF:     PORTB &= ~_BV(MOV_LED_PIN);  break;
     case CMD_DOOR_LED_ON:          PORTB |=  _BV(DOOR_LED_PIN); break;
     case CMD_DOOR_LED_OFF:         PORTB &= ~_BV(DOOR_LED_PIN); break;
-    case CMD_BUZZER_PLAY_ONESHOT:  buzzer_request = 1;           break;
+    case CMD_BUZZER_PLAY_ONESHOT:  buzzer_request = 1;          break;
+    case CMD_DING:                 ding_request = 1;            break;
+
     default: break;
     }
 }
@@ -73,7 +76,7 @@ static void tone_stop(void)
     PORTD  &= ~_BV(BUZZER_PIN);    /* ensure low level  */
 }
 
-/* -------- data taken from your melody table -------- */
+/* -------- emergency note util -------- */
 static void play_note(uint16_t ocr, uint16_t ms)
 {
     tone_start(ocr);
@@ -91,6 +94,15 @@ static void play_melody(void)
     play_note(22907, 62);   play_note(20408, 62);   /* F4 G4 */
     play_note(15287, 62);                           /* C5    */
 }
+
+
+/* floor arrival ding */
+static inline void play_ding(void)
+{
+    /* 500 Hz, 100 ms */
+    play_note(16000, 100);      /* OCR1A = 16000 ⇒ ~500 Hz */
+}
+
 
 /* ===========================================================
    MAIN
@@ -111,6 +123,11 @@ int main(void)
         {
             buzzer_request = 0;
             play_melody();         /* ~1.7 s blocking OK on slave */
+        }
+        if (ding_request)
+        {
+            ding_request= 0;
+            play_ding();
         }
     }
 }

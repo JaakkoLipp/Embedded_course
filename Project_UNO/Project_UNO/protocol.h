@@ -13,4 +13,8 @@
 /* Emergency – play buzzer melody once */
 #define CMD_BUZZER_PLAY_ONESHOT 0x20
 
+/* additional feature ding */
+#define CMD_DING 0x25
+
+
 #endif /* PROTOCOL_H */
