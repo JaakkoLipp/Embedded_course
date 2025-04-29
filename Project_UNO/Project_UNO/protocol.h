@@ -10,4 +10,7 @@
 #define CMD_DOOR_LED_ON       0x12
 #define CMD_DOOR_LED_OFF      0x13
 
+/* Emergency – play buzzer melody once */
+#define CMD_BUZZER_PLAY_ONESHOT 0x20
+
 #endif /* PROTOCOL_H */
