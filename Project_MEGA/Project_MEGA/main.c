@@ -45,7 +45,7 @@ static void led_door_on      (void){ spi_cmd(CMD_DOOR_LED_ON);    }
 static void led_door_off     (void){ spi_cmd(CMD_DOOR_LED_OFF);   }
 
 /* ---------------- main state machine ---------------- */
-#define FLOOR_TIME_SEC 3      /* 1�s per floor in this simple simulation */
+#define FLOOR_TIME_SEC 250      /* 1�s per floor in this simple simulation */
 
 enum state_t { ST_IDLE, ST_MOVING, ST_DOOR };
 
@@ -85,7 +85,7 @@ int main(void)
             if(target_floor == current_floor)
             {
                 /* Fault: blink movement LED 3� and stay in IDLE */
-                for(uint8_t i=0;i<3;i++){ led_movement_on(); DELAY_ms(500); led_movement_off(); DELAY_ms(500);}                
+                for(uint8_t i=0;i<3;i++){ led_movement_on(); _delay_ms(500); led_movement_off(); _delay_ms(500);}
             }
             else
             {
@@ -107,7 +107,7 @@ int main(void)
                 lcd_puts("Floor ");
                 lcd_puts(buf);
                 /* simple time model */
-                DELAY_sec(FLOOR_TIME_SEC);
+                _delay_ms(FLOOR_TIME_SEC);
             }
             led_movement_off();
             state = ST_DOOR;
@@ -118,11 +118,11 @@ int main(void)
             led_door_on();
             lcd_clrscr();
             lcd_puts("Door opening...");
-            DELAY_sec(5);
+            _delay_ms(5000);
             led_door_off();
             lcd_clrscr();
             lcd_puts("Door closed");
-            DELAY_sec(1);
+            _delay_ms(200);
             state = ST_IDLE;
             break;
         }
