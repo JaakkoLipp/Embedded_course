@@ -1,37 +1,124 @@
-# Elevator Control System
+# Elevator-Project
 
-This project implements an elevator system using an **Arduino MEGA (master)** and an **Arduino UNO (slave)** communicating via SPI with ISR.
+A two-board AVR elevator simulator built for the **BL40A1812 – Introduction to Embedded Systems** course  
+_(MEGA 2560 master + UNO 328P slave, SPI link, keypad, LCD, LEDs & buzzer)_
 
-## Overview
+<p align="center">
+  <img src="docs/demo_gif_placeholder.gif" width="500" alt="demo">
+</p>
 
-- **Arduino MEGA (Master):**
-  - **Input & Display:**  
-    - Keypad for floor numbers (0–99)
-    - LCD for displaying status (idle, current floor, door, emergency)
-    - External emergency button  
-  - **Logic:**  
-    - Elevator movement (up/down, fault state)
-    - Door control (open for 5 seconds)
-    - Emergency sequence with appropriate notifications
+---
 
-- **Arduino UNO (Slave):**
-  - **Peripheral Control:**  
-    - Movement LED (on during movement, blinks 3 times on fault/emergency)
-    - Door LED (indicates door open/close)
-    - Buzzer (plays melody with at least 4 notes during emergencies)
-  - **Communication:**  
-    - Receives commands from the MEGA (optionally using ISRs for efficiency)
+## Features – quick list
 
-## Hardware & Software
+| ✔                                                                                                        | Function |
+| -------------------------------------------------------------------------------------------------------- | -------- |
+| **Idle state** – LCD prompts _“Choose floor”_ (00-99)                                                    |
+| **Moving state** – real-time floor display, movement LED on                                              |
+| **Arrival ding** – short chime on every reached floor                                                    |
+| **Door cycle** – door LED on 5 s, LCD messages                                                           |
+| **Fault** – selecting the current floor blinks LED 3×                                                    |
+| **Improved emergency** – push-button aborts movement; user must press **#** to open door + single melody |
+| **Timer-driven FSM** – MEGA uses a 10 ms **Timer-1 ISR** (extra-credit “Use ISR” point)                  |
+| Clean SPI protocol (single-byte opcodes)                                                                 |
 
-- **Hardware:**  
-  - Arduino MEGA (ATmega2560)  
-  - Arduino UNO (ATmega328p)  
-  - Keypad, LCD, 2 LEDs, Buzzer, External Emergency Button
+---
 
-- **Software:**  
-  - Developed in Microchip Studio  
-  - Uses provided libraries for LCD and keypad  
-  - Implements SPI/I2C communication for board interaction
+## Hardware BOM
 
+|                       Qty | Part                        | Notes                           |
+| ------------------------: | --------------------------- | ------------------------------- |
+|                         1 | **Arduino MEGA 2560**       | Master controller               |
+|                         1 | **Arduino UNO R3**          | Slave controller                |
+|                         1 | 4×4 matrix keypad           | Floor entry                     |
+|                         1 | 16×2 HD44780 LCD            | User display                    |
+|                         1 | Mini piezo buzzer           | Arrival ding + emergency melody |
+|                         2 | LEDs + 330 Ω resistors      | Movement (green), Door (blue)   |
+|                         1 | Push-button + 10 kΩ pull-up | Emergency                       |
+| Hook-up wires, USB cables |
 
+See [docs/schematic.pdf](docs/schematic.pdf) for the full wiring diagram (TBD).
+
+---
+
+## Pin-out summary
+
+| Signal            | MEGA pin           | UNO pin          |
+| ----------------- | ------------------ | ---------------- |
+| **SPI SS**        | PB0 (D53) →        | PB2 (D10, input) |
+| **SPI MOSI**      | PB2 (D51) →        | PB3 (D11)        |
+| **SPI MISO**      | PB3 (D50) ←        | PB4 (D12)        |
+| **SPI SCK**       | PB1 (D52) →        | PB5 (D13)        |
+| **Emergency btn** | PE4 (D2, **INT4**) | –                |
+| **Movement LED**  | –                  | PB0 (D8)         |
+| **Door LED**      | –                  | PB1 (D9)         |
+| **Buzzer**        | –                  | PD3 (D3, OC2B)   |
+
+Keypad rows/cols on MEGA **PORTK**, LCD on **PORTA** (see schematic).
+
+---
+
+## Repository structure
+
+```
+.
+├── Project_MEGA/          # Microchip-Studio solution for ATmega2560
+│   ├── main.c             # Finite-state machine, ISR tick, SPI master
+│   └── ...
+├── Project_UNO/           # Solution for ATmega328P slave
+│   ├── main.c             # LED + buzzer drivers, SPI ISR
+│   └── ...
+├── docs/
+│   ├── schematic.pdf
+│   └── demo_gif_placeholder.gif
+└── README.md
+```
+
+---
+
+## Building & flashing
+
+1. **Microchip Studio**
+
+   - Open `Project_MEGA/Project_MEGA.atsln`, hit **Build → Build All**.
+   - Same for `Project_UNO/Project_UNO.atsln`.
+
+2. **Upload**
+   - MEGA: `avrdude -p atmega2560 -c wiring -P COMx -b115200 -U flash:w:Project_MEGA.hex`
+   - UNO : `avrdude -p m328p     -c arduino -P COMy -b115200 -U flash:w:Project_UNO.hex`
+
+(Or just use the **Upload** button in Microchip Studio if the boards are recognised.)
+
+---
+
+## How it works (high-level)
+
+- **MEGA** runs a non-blocking FSM. Timing is from a 10 ms **Timer-1 CTC ISR** (`tick10ms`).
+- **Emergency** sets `emg_flag` in `ISR(INT4_vect)`.
+- **UNO** reacts to single-byte SPI opcodes in `ISR(SPI_STC_vect)`:
+  - LED on/off, **CMD_DING**, **CMD_BUZZER_PLAY_ONESHOT**.
+  - Buzzer tone is generated by Timer-1 toggling PD3.
+
+Full details in the inline comments; every public function has a Doxygen-style header.
+
+---
+
+## Extra-credit implemented
+
+- **Improved emergency** (+½ pt)
+- **Use ISR** on both boards (+1 pt)
+- **Arrival ding feature** (+½ pt)
+
+---
+
+## Contributors and credit
+
+_Planning and Implementation_ – Group 28
+_Documentation and general consultation help_ – ChatGPT-o3
+_Course and peripheral libraries_ – LUT & Lab staff
+
+---
+
+## License
+
+MIT – see [LICENSE](LICENSE) for details.
