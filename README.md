@@ -11,15 +11,14 @@ _(MEGA 2560 master + UNO 328P slave, SPI link, keypad, LCD, LEDs & buzzer)_
 
 ## Features – quick list
 
-| -------------------------------------------------------------------------------------------------------- |
-| **Idle state** – LCD prompts _“Choose floor”_ (00-99) |
-| **Moving state** – real-time floor display, movement LED on |
-| **Arrival ding** – short chime on every reached floor |
-| **Door cycle** – door LED on 5 s, LCD messages |
-| **Fault** – selecting the current floor blinks LED 3× |
-| **Improved emergency** – push-button aborts movement; user must press **#** to open door + single melody |
-| **Timer-driven FSM** – MEGA uses a 10 ms **Timer-1 ISR** (extra-credit “Use ISR” point) |
-| Clean SPI protocol (single-byte opcodes) |
+- **Idle state** – LCD prompts _“Choose floor”_ (00-99)
+- **Moving state** – real-time floor display, movement LED on
+- **Arrival ding** – short chime on every reached floor
+- **Door cycle** – door LED on 5 s, LCD messages
+- **Fault** – selecting the current floor blinks LED 3×
+- **Improved emergency** – push-button aborts movement; user must press **#** to open door + single melody
+- **Timer-driven FSM** – MEGA uses a 10 ms **Timer-1 ISR** (extra-credit “Use ISR” point)
+- Clean SPI protocol (single-byte opcodes)
 
 ---
 
