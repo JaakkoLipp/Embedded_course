@@ -120,3 +120,11 @@ _Course and peripheral libraries_ – LUT & Lab staff
 ## License
 
 MIT – see [LICENSE](LICENSE) for details.
+
+## AI disclaimer
+
+GPT-o3 was used in:
+- formatting and improving the code readability.
+- commenting parts of the code
+- writing documentation
+- as general guidance and help in decision making
